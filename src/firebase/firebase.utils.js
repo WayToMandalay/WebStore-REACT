@@ -23,6 +23,7 @@ export const auth = getAuth(app)
 
 const provider = new GoogleAuthProvider()
 provider.setCustomParameters({prompt: 'select_account'})
+
 export const signInWithGoogle = () => signInWithPopup(auth, provider)
 
 
@@ -30,7 +31,7 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
     if (!userAuth) return
     const querySnapshot = await getDocs(collection(dataBase, `users`))
 
-    const userRef = querySnapshot.docs.find((el) => {
+    let userRef = querySnapshot.docs.find((el) => {
         return el.id === userAuth.uid
     })
 
@@ -40,16 +41,16 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
 
         try {
             await setDoc(doc(dataBase, 'users', userAuth.uid), {
-                displayName,
-                email,
-                createdAt,
-                ...additionalData
-            })
+                    displayName,
+                    email,
+                    createdAt,
+                    ...additionalData
+                }
+            )
         } catch (err) {
             console.log(`error is ${err}`)
         }
     }
-
     return userRef
 }
 
