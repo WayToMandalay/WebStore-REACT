@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react'
 import {Routes, Route, Navigate} from 'react-router'
-
 import './App.css'
 
 import HomePage from './pages/homepage/homepage.component'
