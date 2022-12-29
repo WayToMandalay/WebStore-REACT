@@ -1,57 +1,49 @@
-import {initializeApp} from 'firebase/app'
-import {getFirestore} from 'firebase/firestore'
-import {getAuth, signInWithPopup, GoogleAuthProvider} from 'firebase/auth'
-import {doc, collection, getDocs, setDoc} from 'firebase/firestore'
-
+import firebase from 'firebase/app';
+import 'firebase/firestore';
+import 'firebase/auth';
 
 const config = {
-    apiKey: 'AIzaSyDxw0hdYY-GDtrgJVhcr5oWTrR1Jou1wKE',
-    authDomain: 'my-webstore-550cd.firebaseapp.com',
-    projectId: 'my-webstore-550cd',
-    storageBucket: 'my-webstore-550cd.appspot.com',
-    messagingSenderId: '1032488480243',
-    appId: '1:1032488480243:web:afef326e0ef4332522f686',
-    measurementId: 'G-PH1XMXZDBZ'
-}
+  apiKey: 'AIzaSyCdHT-AYHXjF7wOrfAchX4PIm3cSj5tn14',
+  authDomain: 'crwn-db.firebaseapp.com',
+  databaseURL: 'https://crwn-db.firebaseio.com',
+  projectId: 'crwn-db',
+  storageBucket: 'crwn-db.appspot.com',
+  messagingSenderId: '850995411664',
+  appId: '1:850995411664:web:7ddc01d597846f65'
+};
 
-const app = initializeApp(config)
-
-export const dataBase = getFirestore(app)
-
-
-export const auth = getAuth(app)
-
-const provider = new GoogleAuthProvider()
-provider.setCustomParameters({prompt: 'select_account'})
-
-export const signInWithGoogle = () => signInWithPopup(auth, provider)
-
+firebase.initializeApp(config);
 
 export const createUserProfileDocument = async (userAuth, additionalData) => {
-    if (!userAuth) return
-    const querySnapshot = await getDocs(collection(dataBase, `users`))
+  if (!userAuth) return;
 
-    let userRef = querySnapshot.docs.find((el) => {
-        return el.id === userAuth.uid
-    })
+  const userRef = firestore.doc(`users/${userAuth.uid}`);
 
-    if (!userRef) {
-        const {displayName, email} = userAuth
-        const createdAt = new Date()
+  const snapShot = await userRef.get();
 
-        try {
-            await setDoc(doc(dataBase, 'users', userAuth.uid), {
-                    displayName,
-                    email,
-                    createdAt,
-                    ...additionalData
-                }
-            )
-        } catch (err) {
-            console.log(`error is ${err}`)
-        }
+  if (!snapShot.exists) {
+    const { displayName, email } = userAuth;
+    const createdAt = new Date();
+    try {
+      await userRef.set({
+        displayName,
+        email,
+        createdAt,
+        ...additionalData
+      });
+    } catch (error) {
+      console.log('error creating user', error.message);
     }
-    return userRef
-}
+  }
 
+  return userRef;
+};
 
+export const auth = firebase.auth();
+export const firestore = firebase.firestore();
+
+const provider = new firebase.auth.GoogleAuthProvider();
+provider.setCustomParameters({ prompt: 'select_account' });
+export const signInWithGoogle = () => auth.signInWithPopup(provider);
+
+export default firebase;
